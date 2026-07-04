@@ -237,11 +237,11 @@ Set-ItemProperty `
 Write-Host ""
 Write-Host "Desactivando Widgets..."
 
-Set-ItemProperty `
-    -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" `
-    -Name "TaskbarDa" `
-    -Value 0 `
-    -ErrorAction SilentlyContinue
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa /t REG_DWORD /d 0 /f | Out-Null
+
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Feeds" /v ShellFeedsTaskbarViewMode /t REG_DWORD /d 2 /f | Out-Null
+
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Feeds" /v IsFeedsAvailable /t REG_DWORD /d 0 /f | Out-Null
 
 # ==========================================
 # CURSOR CEREBRO
@@ -250,30 +250,39 @@ Set-ItemProperty `
 Write-Host ""
 Write-Host "Aplicando cursor CEREBRO..."
 
-$ConfigFolder = "$env:TEMP\CEREBRO"
+$CursorFolder = "$env:LOCALAPPDATA\Microsoft\Windows\Cursors"
 
 New-Item `
     -ItemType Directory `
-    -Path $ConfigFolder `
+    -Path $CursorFolder `
     -Force | Out-Null
 
-Invoke-WebRequest `
-    -Uri "https://raw.githubusercontent.com/t3st-scr1pt/CEREBRO-DEPLOY/main/configs/Accessibility.reg" `
-    -OutFile "$ConfigFolder\Accessibility.reg"
+$CursorFiles = @(
+"arrow_eoa.cur",
+"busy_eoa.cur",
+"cross_eoa.cur",
+"ew_eoa.cur",
+"helpsel_eoa.cur",
+"ibeam_eoa.cur",
+"link_eoa.cur",
+"move_eoa.cur",
+"nesw_eoa.cur",
+"ns_eoa.cur",
+"nwse_eoa.cur",
+"pen_eoa.cur",
+"person_eoa.cur",
+"pin_eoa.cur",
+"unavail_eoa.cur",
+"up_eoa.cur",
+"wait_eoa.cur"
+)
 
-Invoke-WebRequest `
-    -Uri "https://raw.githubusercontent.com/t3st-scr1pt/CEREBRO-DEPLOY/main/configs/Cursors.reg" `
-    -OutFile "$ConfigFolder\Cursors.reg"
-
-Invoke-WebRequest `
-    -Uri "https://raw.githubusercontent.com/t3st-scr1pt/CEREBRO-DEPLOY/main/configs/Cursors2.reg" `
-    -OutFile "$ConfigFolder\Cursors2.reg"
-
-reg import "$ConfigFolder\Accessibility.reg"
-reg import "$ConfigFolder\Cursors.reg"
-reg import "$ConfigFolder\Cursors2.reg"
-
-# Forzar configuración correcta
+foreach ($File in $CursorFiles)
+{
+    Invoke-WebRequest `
+        -Uri "https://raw.githubusercontent.com/t3st-scr1pt/CEREBRO-DEPLOY/main/configs/cursors/$File" `
+        -OutFile "$CursorFolder\$File"
+}
 
 Set-ItemProperty `
     -Path "HKCU:\Software\Microsoft\Accessibility" `
@@ -291,6 +300,12 @@ Set-ItemProperty `
     -Path "HKCU:\Software\Microsoft\Accessibility" `
     -Name "CursorSize" `
     -Value 2 `
+    -Type DWord
+
+Set-ItemProperty `
+    -Path "HKCU:\Control Panel\Cursors" `
+    -Name "CursorBaseSize" `
+    -Value 48 `
     -Type DWord
 
 Set-ItemProperty `
@@ -363,6 +378,8 @@ catch
 # REINICIAR EXPLORER
 # ==========================================
 
+rundll32.exe user32.dll,UpdatePerUserSystemParameters
+Start-Sleep 2
 Write-Host ""
 Write-Host "Reiniciando Explorer..."
 
