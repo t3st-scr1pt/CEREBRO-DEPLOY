@@ -251,11 +251,19 @@ Write-Host ""
 Write-Host "Aplicando cursor CEREBRO..."
 
 $ConfigFolder = "$env:TEMP\CEREBRO"
+$CursorFolder = "$env:LOCALAPPDATA\Microsoft\Windows\Cursors"
 
 New-Item `
     -ItemType Directory `
     -Path $ConfigFolder `
     -Force | Out-Null
+
+New-Item `
+    -ItemType Directory `
+    -Path $CursorFolder `
+    -Force | Out-Null
+
+# Descargar REG
 
 Invoke-WebRequest `
     -Uri "https://raw.githubusercontent.com/t3st-scr1pt/CEREBRO-DEPLOY/main/configs/Accessibility.reg" `
@@ -269,11 +277,52 @@ Invoke-WebRequest `
     -Uri "https://raw.githubusercontent.com/t3st-scr1pt/CEREBRO-DEPLOY/main/configs/Cursors2.reg" `
     -OutFile "$ConfigFolder\Cursors2.reg"
 
+# Descargar cursores
+
+$CursorFiles = @(
+    "arrow_eoa.cur",
+    "busy_eoa.cur",
+    "cross_eoa.cur",
+    "ew_eoa.cur",
+    "helpsel_eoa.cur",
+    "ibeam_eoa.cur",
+    "link_eoa.cur",
+    "move_eoa.cur",
+    "nesw_eoa.cur",
+    "ns_eoa.cur",
+    "nwse_eoa.cur",
+    "pen_eoa.cur",
+    "person_eoa.cur",
+    "pin_eoa.cur",
+    "unavail_eoa.cur",
+    "up_eoa.cur",
+    "wait_eoa.cur"
+)
+
+foreach ($Cursor in $CursorFiles)
+{
+    $SourceUrl = "https://raw.githubusercontent.com/t3st-scr1pt/CEREBRO-DEPLOY/main/configs/cursors/$Cursor"
+    $DestinationFile = Join-Path $CursorFolder $Cursor
+
+    try
+    {
+        Invoke-WebRequest `
+            -Uri $SourceUrl `
+            -OutFile $DestinationFile
+    }
+    catch
+    {
+        Write-Host "Error descargando $Cursor"
+    }
+}
+
+# Importar configuración
+
 reg import "$ConfigFolder\Accessibility.reg"
 reg import "$ConfigFolder\Cursors.reg"
 reg import "$ConfigFolder\Cursors2.reg"
 
-# Forzar configuración correcta
+# Forzar configuración
 
 Set-ItemProperty `
     -Path "HKCU:\Software\Microsoft\Accessibility" `
