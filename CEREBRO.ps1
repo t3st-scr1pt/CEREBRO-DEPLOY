@@ -84,7 +84,24 @@ Set-ItemProperty `
     -Value 0 `
     -Type DWord
 
-# ==========================================
+# Forzar modo oscuro
+
+Set-ItemProperty `
+    -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" `
+    -Name "AppsUseLightTheme" `
+    -Value 0 `
+    -Type DWord `
+    -Force
+
+Set-ItemProperty `
+    -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" `
+    -Name "SystemUsesLightTheme" `
+    -Value 0 `
+    -Type DWord `
+    -Force
+
+rundll32.exe user32.dll,UpdatePerUserSystemParameters
+    # ==========================================
 # EXPLORADOR
 # ==========================================
 
@@ -419,6 +436,13 @@ Stop-Process `
     -Name explorer `
     -Force `
     -ErrorAction SilentlyContinue
+
+Start-Sleep 3
+
+Start-Process explorer.exe
+Start-Sleep 2
+
+Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
 
 Start-Sleep 3
 
