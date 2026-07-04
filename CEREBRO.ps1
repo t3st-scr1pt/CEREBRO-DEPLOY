@@ -1,5 +1,5 @@
 # ==========================================
-# CEREBRO DEPLOY v1.1
+# CEREBRO DEPLOY v1.2
 # ==========================================
 
 $ErrorActionPreference = "Continue"
@@ -24,11 +24,13 @@ if (!(Get-Command winget -ErrorAction SilentlyContinue))
 # INSTALACION DE APLICACIONES
 # ==========================================
 
+Write-Host ""
+Write-Host "Instalando aplicaciones..."
+
 $Apps = @(
     "Google.Chrome",
     "Google.GoogleDrive",
     "Tailscale.Tailscale",
-    "RustDesk.RustDesk",
     "VideoLAN.VLC",
     "7zip.7zip"
 )
@@ -59,6 +61,7 @@ foreach ($App in $Apps)
 # MODO OSCURO
 # ==========================================
 
+Write-Host ""
 Write-Host "Aplicando modo oscuro..."
 
 New-ItemProperty `
@@ -79,6 +82,7 @@ New-ItemProperty `
 # EXPLORADOR
 # ==========================================
 
+Write-Host ""
 Write-Host "Configurando explorador..."
 
 # Mostrar extensiones
@@ -88,7 +92,7 @@ Set-ItemProperty `
     -Name "HideFileExt" `
     -Value 0
 
-# Mostrar ocultos
+# Mostrar archivos ocultos
 
 Set-ItemProperty `
     -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" `
@@ -99,6 +103,7 @@ Set-ItemProperty `
 # BARRA DE TAREAS
 # ==========================================
 
+Write-Host ""
 Write-Host "Configurando barra de tareas..."
 
 # Mantener centrada
@@ -111,6 +116,10 @@ Set-ItemProperty `
 
 # Ocultar búsqueda
 
+New-Item `
+    -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" `
+    -Force | Out-Null
+
 Set-ItemProperty `
     -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Search" `
     -Name "SearchboxTaskbarMode" `
@@ -118,7 +127,7 @@ Set-ItemProperty `
     -Type DWord `
     -ErrorAction SilentlyContinue
 
-# Ocultar widgets
+# Ocultar Widgets
 
 Set-ItemProperty `
     -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" `
@@ -126,7 +135,7 @@ Set-ItemProperty `
     -Value 0 `
     -ErrorAction SilentlyContinue
 
-# Ocultar vista de tareas
+# Ocultar Vista de tareas
 
 Set-ItemProperty `
     -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" `
@@ -135,9 +144,10 @@ Set-ItemProperty `
     -ErrorAction SilentlyContinue
 
 # ==========================================
-# COLOR DE ENFASIS VERDE
+# COLOR DE ENFASIS VERDE CEREBRO
 # ==========================================
 
+Write-Host ""
 Write-Host "Aplicando color de enfasis..."
 
 New-Item `
@@ -146,36 +156,42 @@ New-Item `
 
 Set-ItemProperty `
     -Path "HKCU:\Software\Microsoft\Windows\DWM" `
-    -Name "ColorizationColor" `
-    -Value 10806272 `
+    -Name "ColorPrevalence" `
+    -Value 1 `
+    -Type DWord
+
+Set-ItemProperty `
+    -Path "HKCU:\Software\Microsoft\Windows\DWM" `
+    -Name "AccentColor" `
+    -Value 4279270416 `
     -Type DWord `
     -ErrorAction SilentlyContinue
 
 Set-ItemProperty `
     -Path "HKCU:\Software\Microsoft\Windows\DWM" `
-    -Name "ColorPrevalence" `
-    -Value 1 `
+    -Name "ColorizationColor" `
+    -Value 4279270416 `
     -Type DWord `
     -ErrorAction SilentlyContinue
 
 # ==========================================
-# CONFIGURACION DEL RATON
+# CURSOR WINDOWS 11 VERDE
 # ==========================================
 
-Write-Host "Configurando raton..."
-
-# Velocidad 13
-
-Set-ItemProperty `
-    -Path "HKCU:\Control Panel\Mouse" `
-    -Name "MouseSensitivity" `
-    -Value "13"
-
-# Cursor Windows 11 personalizado
+Write-Host ""
+Write-Host "Configurando cursor..."
 
 New-Item `
     -Path "HKCU:\Software\Microsoft\Accessibility" `
     -Force | Out-Null
+
+# Tipo cursor personalizado
+
+Set-ItemProperty `
+    -Path "HKCU:\Software\Microsoft\Accessibility" `
+    -Name "CursorType" `
+    -Value 6 `
+    -Type DWord
 
 # Tamaño 2
 
@@ -183,22 +199,28 @@ Set-ItemProperty `
     -Path "HKCU:\Software\Microsoft\Accessibility" `
     -Name "CursorSize" `
     -Value 2 `
-    -Type DWord `
-    -ErrorAction SilentlyContinue
+    -Type DWord
 
-# Color verde
+# Verde (#00FF00)
 
 Set-ItemProperty `
     -Path "HKCU:\Software\Microsoft\Accessibility" `
     -Name "CursorColor" `
     -Value 65280 `
-    -Type DWord `
-    -ErrorAction SilentlyContinue
+    -Type DWord
+
+# Velocidad ratón = 13
+
+Set-ItemProperty `
+    -Path "HKCU:\Control Panel\Mouse" `
+    -Name "MouseSensitivity" `
+    -Value "13"
 
 # ==========================================
 # ENERGIA
 # ==========================================
 
+Write-Host ""
 Write-Host "Configurando energia..."
 
 powercfg /hibernate off
@@ -211,6 +233,7 @@ powercfg /change monitor-timeout-ac 0
 # WALLPAPER
 # ==========================================
 
+Write-Host ""
 Write-Host "Aplicando wallpaper..."
 
 try
@@ -258,9 +281,10 @@ catch
 }
 
 # ==========================================
-# REINICIAR EXPLORADOR
+# REINICIAR EXPLORER
 # ==========================================
 
+Write-Host ""
 Write-Host "Reiniciando Explorer..."
 
 Stop-Process `
