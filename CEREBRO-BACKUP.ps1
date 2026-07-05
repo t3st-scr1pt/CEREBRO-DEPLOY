@@ -1,11 +1,9 @@
 # ==========================================
-# CEREBRO DEPLOY v1.4
+# CEREBRO DEPLOY v1.3
 # ==========================================
 
-$ErrorActionPreference = "Continue"
-
 # ==========================================
-# SISTEMA DE LOGS
+# SISTEMA DE LOGs
 # ==========================================
 
 $LogFolder = "C:\CEREBRO\Logs"
@@ -16,12 +14,6 @@ New-Item `
 -Path $LogFolder | Out-Null
 
 $LogFile = "$LogFolder\install.log"
-$StatusFile = "$LogFolder\estado.txt"
-
-"INICIANDO DEPLOY" |
-Out-File `
-$StatusFile `
--Force
 
 Start-Transcript `
 -Path $LogFile `
@@ -31,26 +23,13 @@ Start-Transcript `
 # COMIENZO DE DEPLOY
 # ==========================================
 
+$ErrorActionPreference = "Continue"
+
 Write-Host ""
 Write-Host "====================================="
 Write-Host "      CEREBRO DEPLOY INICIADO"
 Write-Host "====================================="
 Write-Host ""
-
-# ==========================================
-# ENERGÍA
-# ==========================================
-
-Write-Host ""
-Write-Host "Configurando energia..."
-
-powercfg -h off
-
-powercfg /change standby-timeout-ac 0
-powercfg /change monitor-timeout-ac 0
-
-powercfg /change standby-timeout-dc 0
-powercfg /change monitor-timeout-dc 0
 
 # ==========================================
 # COMPROBAR WINGET
@@ -59,38 +38,7 @@ powercfg /change monitor-timeout-dc 0
 if (!(Get-Command winget -ErrorAction SilentlyContinue))
 {
     Write-Host "ERROR: Winget no está disponible."
-
-    Stop-Transcript
-
     exit
-}
-
-# ==========================================
-# ESTRUCTURA CEREBRO
-# ==========================================
-
-"Creando estructura CEREBRO" |
-Out-File `
-$StatusFile `
--Force
-
-Write-Host ""
-Write-Host "Creando estructura CEREBRO..."
-
-$Folders = @(
-    "C:\CEREBRO",
-    "C:\CEREBRO\Scripts",
-    "C:\CEREBRO\Tools",
-    "C:\CEREBRO\Wallpapers",
-    "C:\CEREBRO\Configs"
-)
-
-foreach ($Folder in $Folders)
-{
-    New-Item `
-        -ItemType Directory `
-        -Path $Folder `
-        -Force | Out-Null
 }
 
 # ==========================================
@@ -113,35 +61,48 @@ $Apps = @(
 
 foreach ($App in $Apps)
 {
-    "Instalando $App" |
-    Out-File `
-    $StatusFile `
-    -Force
-
-    Write-Host ""
-    Write-Host "Instalando $App..."
-
-    winget install `
-        --id $App `
-        --exact `
-        --silent `
-        --accept-package-agreements `
-        --accept-source-agreements
-
-    if($LASTEXITCODE -eq 0)
+    try
     {
+        Write-Host ""
+        Write-Host "Instalando $App..."
+
+        winget install `
+            --id $App `
+            --exact `
+            --silent `
+            --accept-package-agreements `
+            --accept-source-agreements
+
         Write-Host "OK -> $App"
     }
-    else
+    catch
     {
         Write-Host "ERROR -> $App"
     }
 }
 
-"Configurando Windows" |
-Out-File `
-$StatusFile `
--Force
+# ==========================================
+# ESTRUCTURA CEREBRO
+# ==========================================
+
+Write-Host ""
+Write-Host "Creando estructura CEREBRO..."
+
+$Folders = @(
+    "C:\CEREBRO",
+    "C:\CEREBRO\Scripts",
+    "C:\CEREBRO\Tools",
+    "C:\CEREBRO\Wallpapers",
+    "C:\CEREBRO\Configs"
+)
+
+foreach ($Folder in $Folders)
+{
+    New-Item `
+        -ItemType Directory `
+        -Path $Folder `
+        -Force | Out-Null
+}
 
 # ==========================================
 # MODO OSCURO
@@ -402,6 +363,22 @@ Set-ItemProperty `
 rundll32.exe user32.dll,UpdatePerUserSystemParameters
 
 Start-Sleep 2
+# ==========================================
+# ENERGÍA
+# ==========================================
+
+Write-Host ""
+Write-Host "Configurando energía..."
+
+# Evitar suspensión durante y después de la instalación
+
+powercfg -h off
+
+powercfg /change standby-timeout-ac 0
+powercfg /change monitor-timeout-ac 0
+
+powercfg /change standby-timeout-dc 0
+powercfg /change monitor-timeout-dc 0
 
 # ==========================================
 # WALLPAPER
@@ -451,31 +428,6 @@ catch
 }
 
 # ==========================================
-# RESUMEN FINAL
-# ==========================================
-
-"COMPLETADO" |
-Out-File `
-$StatusFile `
--Force
-
-@"
-=================================
-CEREBRO DEPLOY
-=================================
-
-Version: 1.4
-
-Fecha: $(Get-Date)
-
-Estado: COMPLETADO
-
-Equipo: $env:COMPUTERNAME
-
-"@ | Out-File `
-"C:\CEREBRO\Logs\Resumen.txt"
-
-# ==========================================
 # REINICIAR EXPLORER
 # ==========================================
 
@@ -500,8 +452,8 @@ Write-Host " Reiniciando equipo en 15 segundos "
 Write-Host "====================================="
 Write-Host ""
 
-Stop-Transcript
-
 Start-Sleep 15
 
 Restart-Computer -Force
+
+Stop-Transcript
