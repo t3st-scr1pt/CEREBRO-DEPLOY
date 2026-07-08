@@ -377,14 +377,13 @@ Set-ItemProperty `
 # WIDGETS
 # ==========================================
 
-Write-Host ""
 Write-Host "Desactivando Widgets..."
 
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v TaskbarDa /t REG_DWORD /d 0 /f | Out-Null
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" `
+/v TaskbarDa /t REG_DWORD /d 0 /f
 
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Feeds" /v ShellFeedsTaskbarViewMode /t REG_DWORD /d 2 /f | Out-Null
-
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Feeds" /v IsFeedsAvailable /t REG_DWORD /d 0 /f | Out-Null
+Stop-Process -Name explorer -Force
+Start-Process explorer
 
 # ==========================================
 # CURSOR T3ST-SCR1PT
