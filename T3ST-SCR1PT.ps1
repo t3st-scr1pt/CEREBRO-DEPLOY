@@ -125,6 +125,100 @@ foreach ($Folder in $Folders)
 }
 
 # ==========================================
+# DEBLOAT WINDOWS 11
+# ==========================================
+
+Write-Host ""
+Write-Host "Eliminando bloatware..." -ForegroundColor Green
+
+$AppsToRemove = @(
+    "Microsoft.XboxApp"
+    "Microsoft.XboxGamingOverlay"
+    "Microsoft.XboxIdentityProvider"
+    "Microsoft.XboxSpeechToTextOverlay"
+
+    "Microsoft.BingNews"
+
+    "Clipchamp.Clipchamp"
+
+    "Microsoft.YourPhone"
+
+    "MicrosoftTeams"
+
+    "Microsoft.GetHelp"
+    "Microsoft.Getstarted"
+
+    "Microsoft.WindowsFeedbackHub"
+
+    "Microsoft.ZuneMusic"
+    "Microsoft.ZuneVideo"
+
+    "Microsoft.People"
+
+    "Microsoft.MicrosoftSolitaireCollection"
+
+    "Microsoft.PowerAutomateDesktop"
+)
+
+foreach ($App in $AppsToRemove)
+{
+    Write-Host "Eliminando $App"
+
+    Get-AppxPackage -Name $App -AllUsers |
+        Remove-AppxPackage -ErrorAction SilentlyContinue
+
+    Get-AppxProvisionedPackage -Online |
+        Where-Object DisplayName -eq $App |
+        Remove-AppxProvisionedPackage -Online -ErrorAction SilentlyContinue
+}
+
+    # DESACTIVAR PUBLICIDAD Y SUGERENCIAS
+
+    Write-Host "Desactivando publicidad..." -ForegroundColor Green
+
+    $CDM = "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager"
+
+    Set-ItemProperty -Path $CDM -Name "SubscribedContent-338388Enabled" -Value 0 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $CDM -Name "SubscribedContent-338389Enabled" -Value 0 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $CDM -Name "SubscribedContent-353694Enabled" -Value 0 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $CDM -Name "SubscribedContent-353696Enabled" -Value 0 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $CDM -Name "SystemPaneSuggestionsEnabled" -Value 0 -ErrorAction SilentlyContinue
+
+    # DESACTIVAR COPILOT
+
+    Write-Host "Desactivando Copilot..." -ForegroundColor Green
+
+    New-Item `
+        -Path "HKCU:\Software\Policies\Microsoft\Windows" `
+        -Name "WindowsCopilot" `
+        -Force | Out-Null
+
+    Set-ItemProperty `
+        -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot" `
+        -Name "TurnOffWindowsCopilot" `
+        -Value 1 `
+        -Type DWord
+
+    # DESACTIVAR TELEMETRÍA BÁSICA
+    Write-Host "Reduciendo telemetría..." -ForegroundColor Green
+
+    New-Item `
+        -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows" `
+        -Name "DataCollection" `
+        -Force | Out-Null
+
+    Set-ItemProperty `
+        -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" `
+        -Name "AllowTelemetry" `
+        -Value 0 `
+        -Type DWord
+
+    # REINICIAR EXPLORER
+    Write-Host "Actualizando Explorer..."
+
+    Stop-Process -Name explorer -Force -ErrorAction SilentlyContinue
+    Start-Process explorer.exe
+# ==========================================
 # INSTALACIÓN DE APLICACIONES
 # ==========================================
 
